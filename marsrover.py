@@ -1,4 +1,5 @@
 import json
+import socket
 
 
 class MarsControlMessage:
@@ -13,6 +14,27 @@ class MarsControlMessage:
         self.button_1 = button_1
         self.button_2 = button_2
         self.potmeter = potmeter
+        self.sock = socket.socket()
+
+    def host(self, host='127.0.0.1', port=50007):
+        self.sock.bind((host, port))
+        self.sock.listen(3)
+        conn, addr = self.sock.accept()
+        print("Connected: ", addr)
+        data = conn.recv(256)
+        print(data)
+        conn.sendall(b'ok')
+
+    def connect(self, host='127.0.0.1', port=50007):
+        self.sock.connect((host, port))
+
+    def send(self):
+        self.sock.sendall(bytes(self.message(), 'utf-8'))
+        data = self.sock.recv(256)
+        print(data)
+
+    def close(self):
+        self.sock.close()
 
     def message(self):
         """Returns the stored dictionary."""
