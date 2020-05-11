@@ -18,12 +18,17 @@ class MarsControlMessage:
 
     def host(self, host='127.0.0.1', port=50007):
         self.sock.bind((host, port))
-        self.sock.listen(3)
-        conn, addr = self.sock.accept()
+        self.sock.listen(1)
+        self.conn, addr = self.sock.accept()
         print("Connected: ", addr)
-        data = conn.recv(256)
-        print(data)
-        conn.sendall(b'ok')
+
+    def serv(self):
+        while True:
+            data = self.conn.recv(256)
+            print(data)
+            if not data:
+                break
+            self.conn.sendall(b'ok')
 
     def connect(self, host='127.0.0.1', port=50007):
         self.sock.connect((host, port))
