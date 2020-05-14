@@ -1,5 +1,6 @@
 import json
 import socket
+import pprint
 
 
 class MarsControlMessage:
@@ -24,10 +25,19 @@ class MarsControlMessage:
 
     def serv(self):
         while True:
-            data = self.conn.recv(256)
-            print(data)
-            if not data:
+            control_string = self.conn.recv(256)
+            print(control_string)
+            if not control_string:
                 break
+            self.json_dictionary = json.loads(control_string)
+            pprint.pprint(self.json_dictionary)
+            self.switch_1 = self.json_dictionary['switch_1']
+            self.switch_2 = self.json_dictionary['switch_2']
+            self.switch_3 = self.json_dictionary['switch_3']
+            self.switch_4 = self.json_dictionary['switch_4']
+            self.button_1 = self.json_dictionary['button_1']
+            self.button_2 = self.json_dictionary['button_2']
+            self.potmeter = self.json_dictionary['potmeter']
             self.conn.sendall(b'ok')
 
     def connect(self, host='127.0.0.1', port=50007):
@@ -66,9 +76,4 @@ class MarsControlMessage:
             else:
                 raise KeyError(key, 'This key should not be here.')
         self.control_string = json.dumps(self.control_dictionary)
-        self.json_dictionary = json.loads(self.control_string)
         return self.control_string
-
-    def received(self):
-        """Returns a dictionary containing the received command."""
-        pass
