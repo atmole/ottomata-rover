@@ -4,46 +4,42 @@ import pprint
 
 
 class MarsControlMessage:
-    """This class sends control messages based on the input."""
+    """This class handles control messages."""
 
-    def __init__(self, switch_1=False, switch_2=False, switch_3=False,
-                 switch_4=False, button_1=False, button_2=False, potmeter=0.1):
-        self.switch_1 = switch_1
-        self.switch_2 = switch_2
-        self.switch_3 = switch_3
-        self.switch_4 = switch_4
-        self.button_1 = button_1
-        self.button_2 = button_2
-        self.potmeter = potmeter
+    def __init__(self, host='127.0.0.1', port=50007):
+        self.switch_1 = False
+        self.switch_2 = False
+        self.switch_3 = False
+        self.switch_4 = False
+        self.button_1 = False
+        self.button_2 = False
+        self.potmeter = 0.1
+        self.host = host
+        self.port = port
         self.sock = socket.socket()
 
-    def host(self, host='127.0.0.1', port=50007):
-        self.sock.bind((host, port))
+    def create_socket(self):
+        """Creates a socket and listens for connection."""
+        self.sock.bind((self.host, self.port))
         self.sock.listen(1)
         self.conn, addr = self.sock.accept()
         print("Connected: ", addr)
 
     def serv(self):
+        """Receives data from the client."""
         while True:
             control_string = self.conn.recv(256)
             print(control_string)
             if not control_string:
                 break
-            self.json_dictionary = json.loads(control_string)
-            pprint.pprint(self.json_dictionary)
-            self.switch_1 = self.json_dictionary['switch_1']
-            self.switch_2 = self.json_dictionary['switch_2']
-            self.switch_3 = self.json_dictionary['switch_3']
-            self.switch_4 = self.json_dictionary['switch_4']
-            self.button_1 = self.json_dictionary['button_1']
-            self.button_2 = self.json_dictionary['button_2']
-            self.potmeter = self.json_dictionary['potmeter']
-            self.conn.sendall(b'ok')
+            self.update_values(control_string)
 
-    def connect(self, host='127.0.0.1', port=50007):
-        self.sock.connect((host, port))
+    def connect(self):
+        """Connects to the server."""
+        self.sock.connect((self.host, self.port))
 
     def send(self):
+        """Sends the control message to the server."""
         self.sock.sendall(bytes(self.message(), 'utf-8'))
         data = self.sock.recv(256)
         print(data)
@@ -52,7 +48,7 @@ class MarsControlMessage:
         self.sock.close()
 
     def message(self):
-        """Returns the stored dictionary."""
+        """Returns the control message string."""
         self.control_dictionary = {
             "switch_1": self.switch_1,
             "switch_2": self.switch_2,
@@ -62,6 +58,7 @@ class MarsControlMessage:
             "button_2": self.button_2,
             "potmeter": self.potmeter
             }
+        # error handling
         for key, value in self.control_dictionary.items():
             if key[0:6] in ["switch", "button"]:
                 if value in [True, False]:
@@ -77,3 +74,16 @@ class MarsControlMessage:
                 raise KeyError(key, 'This key should not be here.')
         self.control_string = json.dumps(self.control_dictionary)
         return self.control_string
+
+    def update_values(self, control_string):
+        """Updates the values in the object based on the argument string."""
+        self.json_dictionary = json.loads(control_string)
+        pprint.pprint(self.json_dictionary)
+        self.switch_1 = self.json_dictionary['switch_1']
+        self.switch_2 = self.json_dictionary['switch_2']
+        self.switch_3 = self.json_dictionary['switch_3']
+        self.switch_4 = self.json_dictionary['switch_4']
+        self.button_1 = self.json_dictionary['button_1']
+        self.button_2 = self.json_dictionary['button_2']
+        self.potmeter = self.json_dictionary['potmeter']
+        self.conn.sendall(b'ok')
