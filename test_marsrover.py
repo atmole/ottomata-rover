@@ -33,13 +33,13 @@ class TestMarsControlMessage(unittest.TestCase):
         self.mc_3.potmeter = 1.97
 
     def test_message(self):
-        self.assertEqual(self.mc_1.message(),
+        self.assertEqual(self.mc_1.control(),
                          '{"switch_1": false, "switch_2": false, ' +
                          '"switch_3": false, "switch_4": false, ' +
                          '"button_1": false, "button_2": false, ' +
                          '"potmeter": 0.55}')
-        self.assertRaises(ValueError, self.mc_2.message)
-        self.assertRaises(ValueError, self.mc_3.message)
+        self.assertRaises(ValueError, self.mc_2.control)
+        self.assertRaises(ValueError, self.mc_3.control)
 
     def tearDown(self):
         pass

@@ -31,3 +31,5 @@ mc_client.potmeter = 0.4
 
 mc_client.send()
 mc_client.close()
+
+#  add threading for control input

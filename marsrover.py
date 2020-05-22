@@ -14,6 +14,8 @@ class MarsControlMessage:
         self.button_1 = False
         self.button_2 = False
         self.potmeter = 0.1
+        self.batteryv = 0.0
+        self.lightsen = 0.0
         self.host = host
         self.port = port
         self.sock = socket.socket()
@@ -33,6 +35,8 @@ class MarsControlMessage:
             if not control_string:
                 break
             self.update_values(control_string)
+            # send diagnostic message
+            self.conn.sendall(bytes(self.diagnose(), 'utf-8'))
 
     def connect(self):
         """Connects to the server."""
@@ -40,14 +44,14 @@ class MarsControlMessage:
 
     def send(self):
         """Sends the control message to the server."""
-        self.sock.sendall(bytes(self.message(), 'utf-8'))
+        self.sock.sendall(bytes(self.control(), 'utf-8'))
         data = self.sock.recv(256)
         print(data)
 
     def close(self):
         self.sock.close()
 
-    def message(self):
+    def control(self):
         """Returns the control message string."""
         self.control_dictionary = {
             "switch_1": self.switch_1,
@@ -75,6 +79,15 @@ class MarsControlMessage:
         self.control_string = json.dumps(self.control_dictionary)
         return self.control_string
 
+    def diagnose(self):
+        """Returns the diagnostic message string."""
+        self.diagnostic_dictionary = {
+            "batteryv": self.batteryv,
+            "lightsen": self.lightsen
+            }
+        self.diagnostic_string = json.dumps(self.diagnostic_dictionary)
+        return self.diagnostic_string
+
     def update_values(self, control_string):
         """Updates the values in the object based on the argument string."""
         self.json_dictionary = json.loads(control_string)
@@ -86,4 +99,3 @@ class MarsControlMessage:
         self.button_1 = self.json_dictionary['button_1']
         self.button_2 = self.json_dictionary['button_2']
         self.potmeter = self.json_dictionary['potmeter']
-        self.conn.sendall(b'ok')
