@@ -10,7 +10,6 @@ import threading
 
 mc_server = MarsControlMessage()
 mc_server.create_socket()
-# mc_server.serv()
 
 mc_server.lightsen = 0.78
 mc_server.batteryv = 3.21
@@ -18,11 +17,9 @@ mc_server.batteryv = 3.21
 
 def exec_command():
     for n in range(10):
-        print(n)
-        print(mc_server.switch_1)
-        print(mc_server.switch_2)
-        print(mc_server.potmeter)
-        sleep(0.5)
+        mc_server.batteryv -= float(n)/87
+        mc_server.lightsen += float(n)/42
+        sleep(1)
 
 
 t1 = threading.Thread(target=mc_server.serv)
@@ -35,5 +32,3 @@ t1.join()
 t2.join()
 sleep(1)
 mc_server.close()
-
-# return changing battery voltage

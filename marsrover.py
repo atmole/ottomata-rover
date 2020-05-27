@@ -4,16 +4,16 @@ import pprint
 
 
 class MarsControlMessage:
-    """This class handles control messages."""
+    """Handles control and diagnostic messages."""
 
     def __init__(self, host='127.0.0.1', port=50007):
-        self.switch_1 = False
-        self.switch_2 = False
-        self.switch_3 = False
-        self.switch_4 = False
-        self.button_1 = False
-        self.button_2 = False
-        self.potmeter = 0.1
+        self.switch_1 = False  # enable left drive
+        self.switch_2 = False  # enable right drive
+        self.switch_3 = False  # enable forward move (rewerse otherwise)
+        self.switch_4 = False  # enable stepper
+        self.button_1 = False  # start pickup sequence
+        self.button_2 = False  # enable flashlight
+        self.potmeter = 0.1    # set speed
         self.batteryv = 0.0
         self.lightsen = 0.0
         self.host = host
@@ -21,17 +21,17 @@ class MarsControlMessage:
         self.sock = socket.socket()
 
     def create_socket(self):
-        """Creates a socket and listens for connection."""
+        """Creates a server socket and listens for connections."""
         self.sock.bind((self.host, self.port))
         self.sock.listen(1)
         self.conn, addr = self.sock.accept()
         print("Connected: ", addr)
 
     def serv(self):
-        """Receives data from the client."""
+        """Receives data from the client, replies with diagnostic msg."""
         while True:
             control_string = self.conn.recv(256)
-            print(control_string)
+            # print(control_string)
             if not control_string:
                 break
             self.update_values(control_string)
@@ -43,16 +43,18 @@ class MarsControlMessage:
         self.sock.connect((self.host, self.port))
 
     def send(self):
-        """Sends the control message to the server."""
+        """Sends the control message to the server, receives diagnostis."""
         self.sock.sendall(bytes(self.control(), 'utf-8'))
         data = self.sock.recv(256)
-        print(data)
+        self.diagnostic_dictionary = json.loads(data)
+        pprint.pprint(self.diagnostic_dictionary)
 
     def close(self):
+        """Closes the socket."""
         self.sock.close()
 
     def control(self):
-        """Returns the control message string."""
+        """Returns an up to date control message string."""
         self.control_dictionary = {
             "switch_1": self.switch_1,
             "switch_2": self.switch_2,
@@ -82,6 +84,7 @@ class MarsControlMessage:
     def diagnose(self):
         """Returns the diagnostic message string."""
         self.diagnostic_dictionary = {
+            # format the floats to make them shorter
             "batteryv": self.batteryv,
             "lightsen": self.lightsen
             }
