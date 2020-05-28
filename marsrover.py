@@ -16,6 +16,7 @@ class MarsControlMessage:
         self.potmeter = 0.1    # set speed
         self.batteryv = 0.0
         self.lightsen = 0.0
+        self.keepalive = True  # keeps the while loop alive
         self.host = host
         self.port = port
         self.sock = socket.socket()
@@ -62,7 +63,8 @@ class MarsControlMessage:
             "switch_4": self.switch_4,
             "button_1": self.button_1,
             "button_2": self.button_2,
-            "potmeter": self.potmeter
+            "potmeter": self.potmeter,
+            "keepalive": self.keepalive
             }
         # error handling
         for key, value in self.control_dictionary.items():
@@ -76,6 +78,8 @@ class MarsControlMessage:
                     pass
                 else:
                     raise ValueError(value, 'is not between 0 and 1.')
+            elif key == "keepalive":
+                pass
             else:
                 raise KeyError(key, 'This key should not be here.')
         self.control_string = json.dumps(self.control_dictionary)
@@ -102,3 +106,4 @@ class MarsControlMessage:
         self.button_1 = self.json_dictionary['button_1']
         self.button_2 = self.json_dictionary['button_2']
         self.potmeter = self.json_dictionary['potmeter']
+        self.keepalive = self.json_dictionary['keepalive']
