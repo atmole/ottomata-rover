@@ -24,14 +24,31 @@ def execute_command():
             logging.info('Right drive enabled')
         else:
             logging.info('Right drive disabled')
-        sleep(1)
+        if mc_server.switch_3:
+            logging.info('Forward movement')
+        else:
+            logging.info('Reverse movement')
+        if mc_server.switch_4:
+            logging.info('Stepper ON')
+        else:
+            logging.info('Stepper OFF')
+        if mc_server.button_1:
+            logging.info('Sample collection')
+        else:
+            logging.info('No sample collection in progress')
+        if mc_server.button_2:
+            logging.info('Unload samples')
+        else:
+            logging.info('No unload in progress')
+        logging.info('-----------')
+        sleep(5)
 
 
 def adc_simulator():
     for n in range(10):
-        mc_server.batteryv -= float(n)/87
-        mc_server.lightsen += float(n)/42
-        sleep(2)
+        mc_server.batteryv -= float(n)/287
+        mc_server.lightsen += float(n)/142
+        sleep(3)
 
 
 mc_server = MarsControlMessage()
@@ -53,5 +70,6 @@ t3.start()
 t1.join()
 t2.join()
 t3.join()
+
 sleep(1)
 mc_server.close()

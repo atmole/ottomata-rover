@@ -7,18 +7,18 @@ class MarsControlMessage:
     """Handles control and diagnostic messages."""
 
     def __init__(self, host='127.0.0.1', port=50007):
-        self.switch_1 = False  # enable left drive
-        self.switch_2 = False  # enable right drive
-        self.switch_3 = False  # enable forward move (rewerse otherwise)
-        self.switch_4 = False  # enable stepper
-        self.button_1 = False  # start pickup sequence
-        self.button_2 = False  # enable flashlight
-        self.potmeter = 0.1    # set speed
-        self.batteryv = 0.0
-        self.lightsen = 0.0
+        self.switch_1 = False  # left drive
+        self.switch_2 = False  # right drive
+        self.switch_3 = False  # forward move (rewerse otherwise)
+        self.switch_4 = False  # stepper
+        self.button_1 = False  # start sample pickup
+        self.button_2 = False  # flashlight
+        self.potmeter = 0.1    # speed
+        self.batteryv = 0.0    # battery voltage
+        self.lightsen = 0.0    # light sensor
         self.keepalive = True  # keeps the while loop alive
-        self.host = host
-        self.port = port
+        self.host = host       # host ip address
+        self.port = port       # host port
         self.sock = socket.socket()
 
     def create_socket(self):
@@ -32,11 +32,10 @@ class MarsControlMessage:
         """Receives data from the client, replies with diagnostic msg."""
         while True:
             control_string = self.conn.recv(256)
-            # print(control_string)
             if not control_string:
                 break
             self.update_values(control_string)
-            # send diagnostic message
+            # reply with a diagnostic message
             self.conn.sendall(bytes(self.diagnose(), 'utf-8'))
 
     def connect(self):
@@ -44,11 +43,11 @@ class MarsControlMessage:
         self.sock.connect((self.host, self.port))
 
     def send(self):
-        """Sends the control message to the server, receives diagnostis."""
+        """Sends the control message to the server, receives diagnostics."""
         self.sock.sendall(bytes(self.control(), 'utf-8'))
         data = self.sock.recv(256)
-        self.diagnostic_dictionary = json.loads(data)
-        pprint.pprint(self.diagnostic_dictionary)
+        diagnostic_dictionary = json.loads(data)
+        pprint.pprint(diagnostic_dictionary)
 
     def close(self):
         """Closes the socket."""
@@ -68,7 +67,7 @@ class MarsControlMessage:
             }
         # error handling
         for key, value in self.control_dictionary.items():
-            if key[0:6] in ["switch", "button"]:
+            if key[0:6] in ["switch", "button", "keepal"]:
                 if value in [True, False]:
                     pass
                 else:
@@ -78,8 +77,6 @@ class MarsControlMessage:
                     pass
                 else:
                     raise ValueError(value, 'is not between 0 and 1.')
-            elif key == "keepalive":
-                pass
             else:
                 raise KeyError(key, 'This key should not be here.')
         self.control_string = json.dumps(self.control_dictionary)
@@ -88,9 +85,8 @@ class MarsControlMessage:
     def diagnose(self):
         """Returns the diagnostic message string."""
         self.diagnostic_dictionary = {
-            # format the floats to make them shorter
-            "batteryv": self.batteryv,
-            "lightsen": self.lightsen
+            "batteryv": "{:.2f}".format(self.batteryv),
+            "lightsen": "{:.2f}".format(self.lightsen)
             }
         self.diagnostic_string = json.dumps(self.diagnostic_dictionary)
         return self.diagnostic_string
@@ -98,7 +94,7 @@ class MarsControlMessage:
     def update_values(self, control_string):
         """Updates the values in the object based on the argument string."""
         self.json_dictionary = json.loads(control_string)
-        pprint.pprint(self.json_dictionary)
+        # pprint.pprint(self.json_dictionary)
         self.switch_1 = self.json_dictionary['switch_1']
         self.switch_2 = self.json_dictionary['switch_2']
         self.switch_3 = self.json_dictionary['switch_3']
