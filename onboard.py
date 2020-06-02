@@ -1,4 +1,4 @@
-# python
+#! python3
 
 """
 On-Board control application for the Mars Rover

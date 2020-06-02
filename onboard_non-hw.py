@@ -1,10 +1,10 @@
-# python
+#! python3
 
 """
 On-Board control application for the Mars Rover
 """
 
-from marsrover import MarsControlMessage
+from mars_control import MarsControlMessage
 from time import sleep
 import threading
 import logging

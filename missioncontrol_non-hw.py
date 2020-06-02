@@ -1,10 +1,10 @@
-# python
+#! python3
 
 """
 Mission Control (remote) application for the Mars Rover
 """
 
-from marsrover import MarsControlMessage
+from mars_control import MarsControlMessage
 from time import sleep
 
 mc_client = MarsControlMessage()

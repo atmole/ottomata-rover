@@ -1,4 +1,4 @@
-# python
+#! python3
 
 """
 Mission Control (remote) application for the Mars Rover
@@ -35,5 +35,3 @@ for _ in range(5):
 
 
 mc_client.close()
-
-#  add threading for control input
