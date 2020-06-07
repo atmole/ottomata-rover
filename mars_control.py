@@ -13,7 +13,7 @@ class MarsControlMessage:
         self.switch_4 = False  # stepper
         self.button_1 = False  # start sample pickup
         self.button_2 = False  # flashlight
-        self.potmeter = 0.1    # speed
+        self.potmeter = 50     # speed
         self.batteryv = 0.0    # battery voltage
         self.lightsen = 0.0    # light sensor
         self.keepalive = True  # keeps the while loop alive
@@ -73,10 +73,10 @@ class MarsControlMessage:
                 else:
                     raise ValueError(value, 'is not BOOL')
             elif key == "potmeter":
-                if value < 1 and value > 0:
+                if value < 100 and value > 0:
                     pass
                 else:
-                    raise ValueError(value, 'is not between 0 and 1.')
+                    raise ValueError(value, 'is not between 0 and 100.')
             else:
                 raise KeyError(key, 'This key should not be here.')
         self.control_string = json.dumps(self.control_dictionary)

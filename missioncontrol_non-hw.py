@@ -1,13 +1,13 @@
 #! python3
 
 """
-Mission Control (remote) application for the Mars Rover
+Mission Control application for the Mars Rover (software only)
 """
 
 from mars_control import MarsControlMessage
 from time import sleep
 
-mc_client = MarsControlMessage()
+mc_client = MarsControlMessage(host='192.168.0.27')
 mc_client.connect()
 
 

@@ -1,7 +1,7 @@
 #! python3
 
 """
-On-Board control application for the Mars Rover
+On-Board control application for the Mars Rover (non-hardware)
 """
 
 from mars_control import MarsControlMessage
