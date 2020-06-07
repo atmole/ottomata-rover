@@ -12,7 +12,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 # logging.disable(logging.INFO)
 
-mc_client = MarsControlMessage()
+mc_client = MarsControlMessage(host='192.168.0.27')
 mh_client = MarsPCB()
 mh_client.check_inputs()
 mc_client.connect()
@@ -32,9 +32,9 @@ while(mc_client.keepalive):
         logging.info('Right drive disabled')
     mc_client.switch_3 = mh_client.SWITCH_3.is_pressed
     mc_client.switch_4 = mh_client.SWITCH_4.is_pressed
-    mc_client.button_1 = round(mh_client.BUTTON1.value)
-    mc_client.button_2 = round(mh_client.BUTTON2.value)
-    mc_client.potmeter = mh_client.POTMETR.value
+    mc_client.button_1 = not round(mh_client.BUTTON1.value)
+    mc_client.button_2 = not round(mh_client.BUTTON2.value)
+    mc_client.potmeter = mh_client.POTMETR.value*100
     mc_client.keepalive = mh_client.SWITCH_5.is_pressed
     mc_client.send()
     sleep(1)

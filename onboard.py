@@ -40,7 +40,7 @@ def execute_command():
             logging.info('Stepper ON')
         else:
             logging.info('Stepper OFF')
-            sleep(5)
+            sleep(1)
         if mc_server.button_1:
             mh_server.pickup()
             logging.info('Sample collection')
@@ -59,9 +59,10 @@ def execute_command():
 
 
 mc_server = MarsControlMessage(host='192.168.0.27')
-mh_server = MarsPCB(steprefresh=5)
+mh_server = MarsPCB(steprefresh=1)
 
-logging.info('Testing the outputs on the rover')
+logging.info('Testing the inputs and outputs on the rover')
+mh_server.check_inputs()
 mh_server.check_outputs()
 logging.info('Creating the socket')
 mc_server.create_socket()

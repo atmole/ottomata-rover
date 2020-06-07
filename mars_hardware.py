@@ -7,7 +7,7 @@ class MarsPCB:
 
     def __init__(self, steprefresh=1):
         # Variables
-        self.servotime = 2
+        self.servotime = 1
         self.steptime = 0.01   # 100 Hz step frequency
         self.steprefresh = steprefresh  # timespan of stepping sequence [s]
         self.just_length = 25  # justification length
@@ -76,18 +76,18 @@ class MarsPCB:
         print("Checking Digital Inputs".center(self.just_length, "="))
         for index, switch in enumerate(self.SWITCHES, start=1):
             self.print_ljust("SWITCH_{i}".format(i=index))
-            self.print_rjust(switch.is_pressed)
+            self.print_rjust(str(switch.is_pressed))
         print("Checking Analog Inputs".center(self.just_length, "="))
         self.print_ljust("BATTERY")
-        self.print_rjust("{:.2f}".format(self.BATTERY.value * 3.3))
+        self.print_rjust("{:.2f}".format(self.BATTERY.value))
         self.print_ljust("AMBIENT")
         self.print_rjust("{:.2f}".format(self.AMBIENT.value))
         self.print_ljust("BUTTON1")
-        self.print_rjust("{:.2f}".format(self.BUTTON1.value))
+        self.print_rjust(str(not round(self.BUTTON1.value)))
         self.print_ljust("BUTTON2")
-        self.print_rjust("{:.2f}".format(self.BUTTON2.value))
+        self.print_rjust(str(not round(self.BUTTON2.value)))
         self.print_ljust("POTMETR")
-        self.print_rjust("{:.2f}".format(self.POTMETR.value))
+        self.print_rjust("{:.2f}".format(self.POTMETR.value*100))
 
     def close_gpio_objects(self):
         """Closes the Analog Input channels and other GPIO objects."""
@@ -134,8 +134,8 @@ class MarsPCB:
         self.SERVO_1.value = 0.2
         self.SERVO_2.value = 0.8
         sleep(self.servotime)
-        self.SERVO_1.value = 0
-        self.SERVO_2.value = 0
+        self.SERVO_1.detach()
+        self.SERVO_2.detach()
 
     def pickup(self):
         """Picks up samples."""
@@ -150,6 +150,7 @@ class MarsPCB:
             self.make_steps(forward=False)
         self.MOSFET3_G.off()
         self.SERVO_1.value = 0.3
+        self.SERVO_1.detach()
 
     def unload(self):
         """Unloads sample container."""
@@ -164,5 +165,6 @@ class MarsPCB:
             self.make_steps(forward=True)
         self.MOSFET3_G.off()
         self.SERVO_1.value = 1
+        self.SERVO_1.detach()
         for _ in range(2):
             self.make_steps(forward=False)
