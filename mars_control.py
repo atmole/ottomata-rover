@@ -1,6 +1,7 @@
 import json
 import socket
 import pprint
+import logging
 
 
 class MarsControlMessage:
@@ -26,7 +27,8 @@ class MarsControlMessage:
         self.sock.bind((self.host, self.port))
         self.sock.listen(1)
         self.conn, addr = self.sock.accept()
-        print("Connected: ", addr)
+        # print("Connected: ", addr)
+        logging.info('Connected: {a}'.format(a=addr))
 
     def serv(self):
         """Receives data from the client, replies with diagnostic msg."""
