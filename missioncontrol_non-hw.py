@@ -6,6 +6,9 @@ Mission Control application for the Mars Rover (software only)
 
 from mars_control import MarsControlMessage
 from time import sleep
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 
 mc_client = MarsControlMessage()
 mc_client.connect()
@@ -32,6 +35,9 @@ while mc_client.keepalive:
     mc_client.button_2 = set_from_kbd('z', 'h', command, mc_client.button_2)
     mc_client.keepalive = set_from_kbd('c', 'x', command, mc_client.keepalive)
     mc_client.send()
+    logging.info('Battery Level: {ba}'.format(ba=mc_client.batteryv))
+    logging.info('Light Level: {li}'.format(li=mc_client.lightsen))
+
     sleep(1)
 
 

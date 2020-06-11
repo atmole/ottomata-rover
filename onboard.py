@@ -51,7 +51,7 @@ def execute_command():
             logging.info('Unload samples')
         else:
             logging.info('No unload in progress')
-        mc_server.batteryv = mh_server.BATTERY.value
+        mc_server.batteryv = mh_server.BATTERY.value*12
         mc_server.lightsen = mh_server.AMBIENT.value
         logging.info('Battery: {bat} Light: {light}'
                      .format(bat=mc_server.batteryv, light=mc_server.lightsen))

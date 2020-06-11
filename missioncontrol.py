@@ -37,6 +37,8 @@ while(mc_client.keepalive):
     mc_client.potmeter = mh_client.POTMETR.value*100
     mc_client.keepalive = mh_client.SWITCH_5.is_pressed
     mc_client.send()
+    logging.info('Battery Level: {ba}'.format(ba=mc_client.batteryv))
+    logging.info('Light Level: {li}'.format(li=mc_client.lightsen))
     sleep(1)
 
 mh_client.close_gpio_objects()

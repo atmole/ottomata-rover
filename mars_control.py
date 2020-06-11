@@ -1,6 +1,5 @@
 import json
 import socket
-import pprint
 import logging
 
 
@@ -49,7 +48,9 @@ class MarsControlMessage:
         self.sock.sendall(bytes(self.control(), 'utf-8'))
         data = self.sock.recv(256)
         diagnostic_dictionary = json.loads(data)
-        pprint.pprint(diagnostic_dictionary)
+        # pprint.pprint(diagnostic_dictionary)
+        self.batteryv = diagnostic_dictionary['batteryv']
+        self.lightsen = diagnostic_dictionary['lightsen']
 
     def close(self):
         """Closes the socket."""
