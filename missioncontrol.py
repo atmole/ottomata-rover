@@ -12,7 +12,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 # logging.disable(logging.INFO)
 
-mc_client = MarsControlMessage(host='192.168.0.27')
+mc_client = MarsControlMessage(host='192.168.2.10')
 mh_client = MarsPCB()
 mh_client.check_inputs()
 mc_client.connect()
@@ -37,8 +37,12 @@ while(mc_client.keepalive):
     mc_client.potmeter = mh_client.POTMETR.value*100
     mc_client.keepalive = mh_client.SWITCH_5.is_pressed
     mc_client.send()
-    logging.info('Battery Level: {ba}'.format(ba=mc_client.batteryv))
+    logging.info('Battery Voltage: {ba}'.format(ba=mc_client.batteryv))
+    # Calculate battery percentage (5.2V - 8.4V)
+    battery_percentage = int((float(mc_client.batteryv) - 5.2) / 3.2 * 100)
+    logging.info('Battery Level: {bp} %'.format(bp=battery_percentage))
     logging.info('Light Level: {li}'.format(li=mc_client.lightsen))
+    logging.info('------------------')
     sleep(1)
 
 mh_client.close_gpio_objects()

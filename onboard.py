@@ -55,15 +55,17 @@ def execute_command():
         mc_server.lightsen = mh_server.AMBIENT.value
         logging.info('Battery: {bat} Light: {light}'
                      .format(bat=mc_server.batteryv, light=mc_server.lightsen))
-        logging.info('-----------')
+        mh_server.steptime = 1/(mc_server.potmeter * 3)
+        logging.info('Steptime: {s}'.format(s=mh_server.steptime))
+        logging.info('loop end'.center(20, '-'))
 
 
-mc_server = MarsControlMessage(host='192.168.0.27')
-mh_server = MarsPCB(steprefresh=1)
+mc_server = MarsControlMessage(host='192.168.2.10')
+mh_server = MarsPCB(steprefresh=2)
 
 logging.info('Testing the inputs and outputs on the rover')
 mh_server.check_inputs()
-mh_server.check_outputs()
+# mh_server.check_outputs()
 logging.info('Creating the socket')
 mc_server.create_socket()
 

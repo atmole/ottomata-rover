@@ -40,7 +40,7 @@ def execute_command():
             logging.info('Unload samples')
         else:
             logging.info('No unload in progress')
-        logging.info('-----------')
+        logging.info('loop end'.center(20, '-'))
         sleep(5)
 
 

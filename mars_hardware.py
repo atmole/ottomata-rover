@@ -10,7 +10,7 @@ class MarsPCB:
         self.servotime = 1
         self.steptime = 0.01   # 100 Hz step frequency
         self.steprefresh = steprefresh  # timespan of stepping sequence [s]
-        self.just_length = 25  # justification length
+        self.just_length = 24  # justification length
 
         # Initialization
         self.SERVO_1 = gpiozero.Servo(24)
@@ -116,7 +116,8 @@ class MarsPCB:
         self.MOSFET2_G.off()
         self.MOSFET3_G.on()
         self.make_steps(forward=True)
-        self.make_steps(forward=False)
+        for _ in range(5):
+            self.make_steps(forward=False)
         self.MOSFET3_G.off()
         self.IR_LED.off()
         self.BUZZER.off()
@@ -141,16 +142,21 @@ class MarsPCB:
         """Picks up samples."""
         self.MOSFET1_G.off()
         self.MOSFET2_G.off()
-        self.SERVO_1.value = 1
-        self.MOSFET3_G.on()
-        for _ in range(2):
-            self.make_steps(forward=True)
         self.SERVO_1.value = 0
-        for _ in range(2):
-            self.make_steps(forward=False)
-        self.MOSFET3_G.off()
-        self.SERVO_1.value = 0.3
+        self.MOSFET3_G.on()
+        for _ in range(20):
+            self.make_steps(forward=True)
+        self.SERVO_1.value = 1
+        sleep(0.5)
         self.SERVO_1.detach()
+        for _ in range(30):
+            self.make_steps(forward=False)
+        self.SERVO_1.value = 0
+        sleep(0.5)
+        self.SERVO_1.detach()
+        for _ in range(10):
+            self.make_steps(forward=True)
+        self.MOSFET3_G.off()
 
     def unload(self):
         """Unloads sample container."""
@@ -158,13 +164,14 @@ class MarsPCB:
         self.MOSFET2_G.off()
         self.SERVO_1.value = 1
         self.MOSFET3_G.on()
-        for _ in range(2):
+        for _ in range(3):
             self.make_steps(forward=False)
         self.SERVO_1.value = 0.4
-        for _ in range(3):
+        for _ in range(8):
             self.make_steps(forward=True)
         self.MOSFET3_G.off()
         self.SERVO_1.value = 1
+        sleep(0.5)
         self.SERVO_1.detach()
-        for _ in range(2):
+        for _ in range(10):
             self.make_steps(forward=False)

@@ -26,7 +26,6 @@ class MarsControlMessage:
         self.sock.bind((self.host, self.port))
         self.sock.listen(1)
         self.conn, addr = self.sock.accept()
-        # print("Connected: ", addr)
         logging.info('Connected: {a}'.format(a=addr))
 
     def serv(self):
@@ -48,7 +47,6 @@ class MarsControlMessage:
         self.sock.sendall(bytes(self.control(), 'utf-8'))
         data = self.sock.recv(256)
         diagnostic_dictionary = json.loads(data)
-        # pprint.pprint(diagnostic_dictionary)
         self.batteryv = diagnostic_dictionary['batteryv']
         self.lightsen = diagnostic_dictionary['lightsen']
 
@@ -76,7 +74,7 @@ class MarsControlMessage:
                 else:
                     raise ValueError(value, 'is not BOOL')
             elif key == "potmeter":
-                if value < 100 and value > 0:
+                if value < 101 and value > 0:
                     pass
                 else:
                     raise ValueError(value, 'is not between 0 and 100.')
