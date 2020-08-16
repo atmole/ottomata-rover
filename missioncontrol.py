@@ -18,20 +18,20 @@ mh_client.check_inputs()
 mc_client.connect()
 
 while(mc_client.keepalive):
-    if mh_client.SWITCH_1.is_pressed:
-        mc_client.switch_1 = True
-        logging.info('Left drive enabled')
-    else:
+    if mh_client.SWITCH_1.is_pressed:  # switches are inverted on the layout
         mc_client.switch_1 = False
         logging.info('Left drive disabled')
-    if mh_client.SWITCH_2.is_pressed:
-        mc_client.switch_2 = True
-        logging.info('Right drive enabled')
     else:
+        mc_client.switch_1 = True
+        logging.info('Left drive enabled')
+    if mh_client.SWITCH_2.is_pressed:
         mc_client.switch_2 = False
         logging.info('Right drive disabled')
-    mc_client.switch_3 = mh_client.SWITCH_3.is_pressed
-    mc_client.switch_4 = mh_client.SWITCH_4.is_pressed
+    else:
+        mc_client.switch_2 = True
+        logging.info('Right drive enabled')
+    mc_client.switch_3 = not mh_client.SWITCH_3.is_pressed
+    mc_client.switch_4 = not mh_client.SWITCH_4.is_pressed
     mc_client.button_1 = not round(mh_client.BUTTON1.value)
     mc_client.button_2 = not round(mh_client.BUTTON2.value)
     mc_client.potmeter = mh_client.POTMETR.value*100

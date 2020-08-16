@@ -32,9 +32,11 @@ def execute_command():
         if mc_server.switch_3:
             fwd = True
             logging.info('Forward movement')
+            mh_server.LIGHT.on()
         else:
             fwd = False
             logging.info('Reverse movement')
+            mh_server.LIGHT.off()
         if mc_server.switch_4:
             mh_server.make_steps(forward=fwd)
             logging.info('Stepper ON')
@@ -42,6 +44,9 @@ def execute_command():
             logging.info('Stepper OFF')
             sleep(1)
         if mc_server.button_1:
+            mh_server.BUZZER.on()
+            sleep(0.5)
+            mh_server.BUZZER.off()
             mh_server.pickup()
             logging.info('Sample collection')
         else:
@@ -61,11 +66,11 @@ def execute_command():
 
 
 mc_server = MarsControlMessage(host='192.168.2.10')
-mh_server = MarsPCB(steprefresh=2)
+mh_server = MarsPCB(steprefresh=1)
 
 logging.info('Testing the inputs and outputs on the rover')
 mh_server.check_inputs()
-# mh_server.check_outputs()
+mh_server.check_outputs()
 logging.info('Creating the socket')
 mc_server.create_socket()
 

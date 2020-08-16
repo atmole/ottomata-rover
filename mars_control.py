@@ -9,10 +9,10 @@ class MarsControlMessage:
     def __init__(self, host='127.0.0.1', port=50007):
         self.switch_1 = False  # left drive
         self.switch_2 = False  # right drive
-        self.switch_3 = False  # forward move (rewerse otherwise)
-        self.switch_4 = False  # stepper
+        self.switch_3 = False  # forward move if True (rewerse otherwise)
+        self.switch_4 = False  # stepper On/Off
         self.button_1 = False  # start sample pickup
-        self.button_2 = False  # flashlight
+        self.button_2 = False  # start sample unload
         self.potmeter = 50     # speed
         self.batteryv = 0.0    # battery voltage
         self.lightsen = 0.0    # light sensor
@@ -74,7 +74,7 @@ class MarsControlMessage:
                 else:
                     raise ValueError(value, 'is not BOOL')
             elif key == "potmeter":
-                if value < 101 and value > 0:
+                if value <= 101 and value > 0:
                     pass
                 else:
                     raise ValueError(value, 'is not between 0 and 100.')

@@ -8,9 +8,9 @@ class MarsPCB:
     def __init__(self, steprefresh=1):
         # Variables
         self.servotime = 1
-        self.steptime = 0.01   # 100 Hz step frequency
+        self.steptime = 0.01            # 100 Hz step frequency
         self.steprefresh = steprefresh  # timespan of stepping sequence [s]
-        self.just_length = 24  # justification length
+        self.just_length = 24           # justification length
 
         # Initialization
         self.SERVO_1 = gpiozero.Servo(24)
@@ -26,21 +26,23 @@ class MarsPCB:
         self.COIL_3 = gpiozero.DigitalOutputDevice(22, initial_value=False)
         self.COIL_4 = gpiozero.DigitalOutputDevice(5,  initial_value=False)
 
-        self.IR_LED = gpiozero.DigitalOutputDevice(6,  initial_value=False)
-        self.BUZZER = gpiozero.DigitalOutputDevice(13, initial_value=False)
-        self.COLORS = gpiozero.DigitalOutputDevice(19, initial_value=False)
+        self.LIGHT = gpiozero.DigitalOutputDevice(13, initial_value=False)
+        self.BUZZER = gpiozero.DigitalOutputDevice(6, initial_value=False)
 
         self.SWITCH_1 = gpiozero.Button(14)
         self.SWITCH_2 = gpiozero.Button(15)
         self.SWITCH_3 = gpiozero.Button(18)
         self.SWITCH_4 = gpiozero.Button(23)
-        self.SWITCH_5 = gpiozero.Button(26)  # Main board switch
+        self.SWITCH_5 = gpiozero.Button(26)  # BCM 26 (Mission Cont Shutdown)
+        self.SWITCH_6 = gpiozero.Button(19)  # BCM 19 (Limit switch input)
 
         self.BATTERY = gpiozero.MCP3008(channel=0)
         self.AMBIENT = gpiozero.MCP3008(channel=1)
         self.BUTTON1 = gpiozero.MCP3008(channel=2)
         self.BUTTON2 = gpiozero.MCP3008(channel=3)
         self.POTMETR = gpiozero.MCP3008(channel=4)
+        self.SWITCH_7 = gpiozero.MCP3008(channel=5)  # Spare limit switch input
+        self.SWITCH_8 = gpiozero.MCP3008(channel=6)  # Spare limit switch input
 
         self.COILS_FWD = [self.COIL_1, self.COIL_2, self.COIL_3, self.COIL_4]
         self.COILS_REV = [self.COIL_4, self.COIL_3, self.COIL_2, self.COIL_1]
@@ -88,6 +90,10 @@ class MarsPCB:
         self.print_rjust(str(not round(self.BUTTON2.value)))
         self.print_ljust("POTMETR")
         self.print_rjust("{:.2f}".format(self.POTMETR.value*100))
+        self.print_ljust("SWITCH_7")
+        self.print_rjust(str(not round(self.SWITCH_7.value)))
+        self.print_ljust("SWITCH_8")
+        self.print_rjust(str(not round(self.SWITCH_8.value)))
 
     def close_gpio_objects(self):
         """Closes the Analog Input channels and other GPIO objects."""
@@ -96,14 +102,19 @@ class MarsPCB:
         self.BUTTON1.close()
         self.BUTTON2.close()
         self.POTMETR.close()
+        self.SWITCH_7.close()
+        self.SWITCH_8.close()
         self.SERVO_1.detach()
         self.SERVO_2.detach()
 
     def check_outputs(self):
         """Self test for the onboard PCB"""
-        self.IR_LED.on()
-        self.BUZZER.on()
-        self.COLORS.on()
+        for _ in range(4):
+            self.LIGHT.on()
+            self.BUZZER.on()
+            sleep(0.2)
+            self.LIGHT.off()
+            self.BUZZER.off()
         self.MOSFET1_G.on()
         self.MOSFET2_G.on()
         self.make_steps(forward=True)
@@ -116,24 +127,22 @@ class MarsPCB:
         self.MOSFET2_G.off()
         self.MOSFET3_G.on()
         self.make_steps(forward=True)
-        for _ in range(5):
+        while self.SWITCH_6.value:
             self.make_steps(forward=False)
+        self.make_steps(forward=True)
         self.MOSFET3_G.off()
-        self.IR_LED.off()
-        self.BUZZER.off()
-        self.COLORS.off()
-        for _ in range(4):
-            self.MOSFET4_G.on()
-            sleep(0.25)
-            self.MOSFET4_G.off()
+        self.MOSFET4_G.on()
+        self.make_steps(forward=True)
+        self.make_steps(forward=False)
+        self.MOSFET4_G.off()
         self.SERVO_1.value = 0
         self.SERVO_2.value = 0
         sleep(self.servotime)
         self.SERVO_1.value = 1
         self.SERVO_2.value = 1
         sleep(self.servotime)
-        self.SERVO_1.value = 0.2
-        self.SERVO_2.value = 0.8
+        self.SERVO_1.value = 0.4
+        self.SERVO_2.value = 0.6
         sleep(self.servotime)
         self.SERVO_1.detach()
         self.SERVO_2.detach()
@@ -144,17 +153,17 @@ class MarsPCB:
         self.MOSFET2_G.off()
         self.SERVO_1.value = 0
         self.MOSFET3_G.on()
-        for _ in range(20):
+        for _ in range(3):
             self.make_steps(forward=True)
         self.SERVO_1.value = 1
         sleep(0.5)
         self.SERVO_1.detach()
-        for _ in range(30):
+        while self.SWITCH_6.value:  # Limit switch stops the movement
             self.make_steps(forward=False)
         self.SERVO_1.value = 0
         sleep(0.5)
         self.SERVO_1.detach()
-        for _ in range(10):
+        for _ in range(3):
             self.make_steps(forward=True)
         self.MOSFET3_G.off()
 
@@ -164,14 +173,14 @@ class MarsPCB:
         self.MOSFET2_G.off()
         self.SERVO_1.value = 1
         self.MOSFET3_G.on()
-        for _ in range(3):
+        while self.SWITCH_6.value:
             self.make_steps(forward=False)
         self.SERVO_1.value = 0.4
-        for _ in range(8):
+        for _ in range(3):
             self.make_steps(forward=True)
         self.MOSFET3_G.off()
         self.SERVO_1.value = 1
         sleep(0.5)
         self.SERVO_1.detach()
-        for _ in range(10):
+        while self.SWITCH_6.value:
             self.make_steps(forward=False)
