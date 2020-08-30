@@ -111,10 +111,10 @@ class MarsPCB:
         """Self test for the onboard PCB"""
         for _ in range(4):
             self.LIGHT.on()
-            self.BUZZER.on()
             sleep(0.2)
             self.LIGHT.off()
-            self.BUZZER.off()
+            sleep(1)
+        self.buzz(4)
         self.MOSFET1_G.on()
         self.MOSFET2_G.on()
         self.make_steps(forward=True)
@@ -127,7 +127,7 @@ class MarsPCB:
         self.MOSFET2_G.off()
         self.MOSFET3_G.on()
         self.make_steps(forward=True)
-        while self.SWITCH_6.value:
+        while not self.SWITCH_6.value:
             self.make_steps(forward=False)
         self.make_steps(forward=True)
         self.MOSFET3_G.off()
@@ -149,6 +149,7 @@ class MarsPCB:
 
     def pickup(self):
         """Picks up samples."""
+        self.buzz(2)
         self.MOSFET1_G.off()
         self.MOSFET2_G.off()
         self.SERVO_1.value = 0
@@ -158,29 +159,32 @@ class MarsPCB:
         self.SERVO_1.value = 1
         sleep(0.5)
         self.SERVO_1.detach()
-        while self.SWITCH_6.value:  # Limit switch stops the movement
+        while not self.SWITCH_6.value:  # Limit switch stops the movement
             self.make_steps(forward=False)
         self.SERVO_1.value = 0
         sleep(0.5)
         self.SERVO_1.detach()
-        for _ in range(3):
-            self.make_steps(forward=True)
         self.MOSFET3_G.off()
 
     def unload(self):
         """Unloads sample container."""
+        self.buzz(3)
         self.MOSFET1_G.off()
         self.MOSFET2_G.off()
         self.SERVO_1.value = 1
         self.MOSFET3_G.on()
-        while self.SWITCH_6.value:
+        while not self.SWITCH_6.value:
             self.make_steps(forward=False)
         self.SERVO_1.value = 0.4
-        for _ in range(3):
-            self.make_steps(forward=True)
         self.MOSFET3_G.off()
         self.SERVO_1.value = 1
         sleep(0.5)
         self.SERVO_1.detach()
-        while self.SWITCH_6.value:
-            self.make_steps(forward=False)
+
+    def buzz(self, n):
+        """Beep n times."""
+        for _ in range(n):
+            self.BUZZER.on()
+            sleep(0.25)
+            self.BUZZER.off()
+            sleep(0.5)

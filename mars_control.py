@@ -10,7 +10,7 @@ class MarsControlMessage:
         self.switch_1 = False  # left drive
         self.switch_2 = False  # right drive
         self.switch_3 = False  # forward move if True (rewerse otherwise)
-        self.switch_4 = False  # stepper On/Off
+        self.switch_4 = False  # automatic or manual pickup / unload
         self.button_1 = False  # start sample pickup
         self.button_2 = False  # start sample unload
         self.potmeter = 50     # speed
