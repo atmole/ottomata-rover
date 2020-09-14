@@ -7,7 +7,7 @@ class MarsPCB:
 
     def __init__(self, steprefresh=1):
         # Variables
-        self.servotime = 1
+        self.servotime = 0.5
         self.steptime = 0.01            # 100 Hz step frequency
         self.steprefresh = steprefresh  # timespan of stepping sequence [s]
         self.just_length = 24           # justification length
@@ -113,7 +113,7 @@ class MarsPCB:
             self.LIGHT.on()
             sleep(0.2)
             self.LIGHT.off()
-            sleep(1)
+            sleep(0.5)
         self.buzz(4)
         self.MOSFET1_G.on()
         self.MOSFET2_G.on()
@@ -126,65 +126,72 @@ class MarsPCB:
         self.make_steps(forward=True)
         self.MOSFET2_G.off()
         self.MOSFET3_G.on()
-        self.make_steps(forward=True)
         while not self.SWITCH_6.value:
             self.make_steps(forward=False)
         self.make_steps(forward=True)
         self.MOSFET3_G.off()
-        self.MOSFET4_G.on()
-        self.make_steps(forward=True)
-        self.make_steps(forward=False)
-        self.MOSFET4_G.off()
-        self.SERVO_1.value = 0
-        self.SERVO_2.value = 0
+        # self.MOSFET4_G.on()
+        # self.make_steps(forward=True)
+        # self.make_steps(forward=False)
+        # self.MOSFET4_G.off()
+        self.SERVO_1.value = 0.98  # rake out
+        self.SERVO_2.value = -0.99  # trap door open
         sleep(self.servotime)
-        self.SERVO_1.value = 1
-        self.SERVO_2.value = 1
-        sleep(self.servotime)
-        self.SERVO_1.value = 0.4
-        self.SERVO_2.value = 0.6
+        self.SERVO_1.value = -0.99  # rake pulled in
+        self.SERVO_2.value = 0.15  # trap door shut
         sleep(self.servotime)
         self.SERVO_1.detach()
         self.SERVO_2.detach()
 
     def pickup(self):
-        """Picks up samples."""
+        """Picks up samples. (Crane and speed must be manually lowered.)"""
         self.buzz(2)
+        # Extend the rake completely
+        self.SERVO_1.value = -0.98
+        sleep(self.servotime)
+        self.SERVO_1.detach()
+        # Short move forward with both wheels to dig into the balls
+        self.MOSFET1_G.on()
+        self.MOSFET2_G.on()
+        self.make_steps(forward=False)
         self.MOSFET1_G.off()
         self.MOSFET2_G.off()
+        # Close the rake to pull in the balls, then move it back to mid
+        self.SERVO_1.value = 0.99
+        sleep(self.servotime)
         self.SERVO_1.value = 0
-        self.MOSFET3_G.on()
-        for _ in range(3):
-            self.make_steps(forward=True)
-        self.SERVO_1.value = 1
-        sleep(0.5)
+        sleep(self.servotime)
         self.SERVO_1.detach()
-        while not self.SWITCH_6.value:  # Limit switch stops the movement
-            self.make_steps(forward=False)
-        self.SERVO_1.value = 0
-        sleep(0.5)
-        self.SERVO_1.detach()
-        self.MOSFET3_G.off()
-
-    def unload(self):
-        """Unloads sample container."""
-        self.buzz(3)
-        self.MOSFET1_G.off()
-        self.MOSFET2_G.off()
-        self.SERVO_1.value = 1
+        # Lift the crane until it touches the limit switch
         self.MOSFET3_G.on()
         while not self.SWITCH_6.value:
             self.make_steps(forward=False)
-        self.SERVO_1.value = 0.4
         self.MOSFET3_G.off()
-        self.SERVO_1.value = 1
-        sleep(0.5)
+
+    def unload(self):
+        """Unloads container. (Crane and speed must be manually lowered.)"""
+        self.buzz(3)
+        # Open the trap door on the bottom of the container
+        self.SERVO_2.value = -1
+        sleep(self.servotime)
+        # Additional shaky movements to loosen stucked parts
+        self.SERVO_1.value = 0.98
+        sleep(self.servotime)
+        self.SERVO_1.value = -0.88
+        self.MOSFET3_G.on()
+        while not self.SWITCH_6.value:
+            self.make_steps(forward=False)
+        self.MOSFET3_G.off()
+        # Shut the trap door
+        self.SERVO_2.value = 0.15
+        sleep(self.servotime)
         self.SERVO_1.detach()
+        self.SERVO_2.detach()
 
     def buzz(self, n):
         """Beep n times."""
         for _ in range(n):
             self.BUZZER.on()
-            sleep(0.25)
+            sleep(0.01)
             self.BUZZER.off()
-            sleep(0.5)
+            sleep(0.2)

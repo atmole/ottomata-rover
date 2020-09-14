@@ -9,117 +9,118 @@ from mars_hardware import MarsPCB
 from time import sleep
 import threading
 import logging
-from picamera import PiCamera
-from datetime import datetime
-import os
+# from picamera import PiCamera
+# from datetime import datetime
+# import os
 
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
-# logging.disable(logging.INFO)  # Uncomment to disable log messages
+logging.disable(logging.INFO)  # Uncomment to disable log messages
 
-camera = PiCamera()
-camera.resolution = (640, 480)
-photo_interval = 10
-
-datestamp = datetime.now()
-folder_name_format = '{:%Y-%m-%d}_photos'
-folder_name = folder_name_format.format(datestamp)
-os.makedirs(folder_name, exist_ok=True)
-logging.info('Created: {f}'.format(f=folder_name))
+# CAMERA
+# camera = PiCamera()
+# camera.resolution = (640, 480)
+# photo_interval = 15
+# datestamp = datetime.now()
+# folder_name_format = '{:%Y-%m-%d_%H}h_photos'
+# folder_name = folder_name_format.format(datestamp)
+# cam_folder = os.path.join('camera', folder_name)
+# os.makedirs(cam_folder, exist_ok=True)
+# logging.info('Created: {f}'.format(f=folder_name))
 
 
 # FUNCTIONS
 def execute_command():
-    while(mc_server.keepalive):
-        if mc_server.switch_3:  # direction
+    while(msg_ob.keepalive):
+        if msg_ob.switch_3:  # direction
             fwd = True
-            logging.info('Forward movement')
-            mh_server.LIGHT.on()
+            logging.info('Reverse movement')
+            hw_ob.LIGHT.off()
         else:
             fwd = False
-            logging.info('Reverse movement')
-            mh_server.LIGHT.off()
-        if mc_server.switch_1:
-            mh_server.MOSFET1_G.on()
+            logging.info('Forward movement')
+            hw_ob.LIGHT.on()
+        if msg_ob.switch_1:
+            hw_ob.MOSFET1_G.on()
             logging.info('Left drive enabled')
         else:
-            mh_server.MOSFET1_G.off()
+            hw_ob.MOSFET1_G.off()
             logging.info('Left drive disabled')
-        if mc_server.switch_2:
-            mh_server.MOSFET2_G.on()
+        if msg_ob.switch_2:
+            hw_ob.MOSFET2_G.on()
             logging.info('Right drive enabled')
         else:
-            mh_server.MOSFET2_G.off()
+            hw_ob.MOSFET2_G.off()
             logging.info('Right drive disabled')
 
-        if mc_server.switch_1 or mc_server.switch_2:
-            mh_server.make_steps(forward=fwd)
+        if msg_ob.switch_1 or msg_ob.switch_2:
+            hw_ob.make_steps(forward=fwd)
             logging.info('Stepper ON')
         else:
             logging.info('Stepper OFF')
             sleep(1)
 
-        if mc_server.switch_4:
-            if mc_server.button_1:
-                mh_server.pickup()
+        if msg_ob.switch_4:
+            if msg_ob.button_1:
+                hw_ob.pickup()
                 logging.info('Sample collection')
-            elif mc_server.button_2:
-                mh_server.unload()
+            elif msg_ob.button_2:
+                hw_ob.unload()
                 logging.info('Unload samples')
         else:
-            if mc_server.button_1:
+            if msg_ob.button_1:
                 logging.info('Manual lowering')
-                mh_server.MOSFET3_G.on()
-                while(mc_server.button_1):
-                    mh_server.make_steps(forward=True)
-                mh_server.MOSFET3_G.off()
-            elif mc_server.button_2:
+                hw_ob.MOSFET3_G.on()
+                while(msg_ob.button_1):
+                    hw_ob.make_steps(forward=True)
+                hw_ob.MOSFET3_G.off()
+            elif msg_ob.button_2:
                 logging.info('Manual lifting')
-                mh_server.MOSFET3_G.on()
-                while(mc_server.button_2 and not mh_server.SWITCH_6.value):
-                    mh_server.make_steps(forward=False)
-                mh_server.MOSFET3_G.off()
+                hw_ob.MOSFET3_G.on()
+                while(msg_ob.button_2 and not hw_ob.SWITCH_6.value):
+                    hw_ob.make_steps(forward=False)
+                hw_ob.MOSFET3_G.off()
 
-        mc_server.batteryv = mh_server.BATTERY.value*12
-        mc_server.lightsen = mh_server.AMBIENT.value
+        msg_ob.batteryv = hw_ob.BATTERY.value*12
+        msg_ob.lightsen = hw_ob.AMBIENT.value
         logging.info('Battery: {bat} Light: {light}'
-                     .format(bat=mc_server.batteryv, light=mc_server.lightsen))
-        mh_server.steptime = 1/(mc_server.potmeter * 3)
-        logging.info('Steptime: {s}'.format(s=mh_server.steptime))
+                     .format(bat=msg_ob.batteryv, light=msg_ob.lightsen))
+        hw_ob.steptime = 1/(msg_ob.potmeter * 7)
+        logging.info('Steptime: {s}'.format(s=hw_ob.steptime))
         logging.info('loop end'.center(20, '-'))
 
 
-def take_photos():
-    while(mc_server.keepalive):
-        raw_timestamp = datetime.now()
-        filename_format = '{:%Y-%m-%d_%H-%M-%S}.jpg'
-        filename = filename_format.format(raw_timestamp)
-        camera.start_preview()
-        sleep(2)  # Camera warm-up time
-        camera.capture(os.path.join(folder_name, filename))
-        sleep(photo_interval)
+# def take_photos():
+#     while(msg_ob.keepalive):
+#         raw_timestamp = datetime.now()
+#         filename_format = '{:%Y-%m-%d_%H-%M-%S}.jpg'
+#         filename = filename_format.format(raw_timestamp)
+#         camera.start_preview()
+#         sleep(2)  # Camera warm-up time
+#         camera.capture(os.path.join(cam_folder, filename))
+#         sleep(photo_interval)
 
 
-mc_server = MarsControlMessage(host='192.168.2.10')
-mh_server = MarsPCB(steprefresh=1)
+msg_ob = MarsControlMessage(host='192.168.2.10')
+hw_ob = MarsPCB(steprefresh=0.5)
 
-logging.info('Testing the inputs and outputs on the rover')
-mh_server.check_inputs()
-mh_server.check_outputs()
-logging.info('Creating the socket')
-mc_server.create_socket()
+logging.info('Testing the inputs and outputs on the rover...')
+hw_ob.check_inputs()
+hw_ob.check_outputs()
+logging.info('Creating the socket...')
+msg_ob.create_socket()
 
-t1 = threading.Thread(target=mc_server.serv)
+t1 = threading.Thread(target=msg_ob.serv)
 t2 = threading.Thread(target=execute_command)
-t3 = threading.Thread(target=take_photos)
+# t3 = threading.Thread(target=take_photos)
 
 t1.start()
 t2.start()
-t3.start()
+# t3.start()
 
 t1.join()
 t2.join()
-t3.join()
+# t3.join()
 
-mc_server.close()
-mh_server.close_gpio_objects()
+msg_ob.close()
+hw_ob.close_gpio_objects()
