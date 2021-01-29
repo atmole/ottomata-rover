@@ -1,7 +1,7 @@
 import gpiozero
 from time import sleep
 
-SERVO_1 = gpiozero.Servo(24)
+SERVO_1 = gpiozero.Servo(25)
 angle = 50
 interval = 0.5
 
@@ -17,7 +17,7 @@ print("""
 """
 NOTES
 SERVO_1 shall to -99 (full open) to +99 (full closed)
-SERVO_2 is shut at 15 and full open at -99
+SERVO_2 is shut at 88 and full open at -88
 """
 
 

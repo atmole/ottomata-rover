@@ -135,10 +135,10 @@ class MarsPCB:
         # self.make_steps(forward=False)
         # self.MOSFET4_G.off()
         self.SERVO_1.value = 0.98  # rake out
-        self.SERVO_2.value = -0.99  # trap door open
+        self.SERVO_2.value = -0.88  # trap door open
         sleep(self.servotime)
         self.SERVO_1.value = -0.99  # rake pulled in
-        self.SERVO_2.value = 0.15  # trap door shut
+        self.SERVO_2.value = 0.88  # trap door shut
         sleep(self.servotime)
         self.SERVO_1.detach()
         self.SERVO_2.detach()
@@ -159,7 +159,7 @@ class MarsPCB:
         # Close the rake to pull in the balls, then move it back to mid
         self.SERVO_1.value = 0.99
         sleep(self.servotime)
-        self.SERVO_1.value = 0
+        self.SERVO_1.value = -0.99
         sleep(self.servotime)
         self.SERVO_1.detach()
         # Lift the crane until it touches the limit switch
@@ -167,12 +167,14 @@ class MarsPCB:
         while not self.SWITCH_6.value:
             self.make_steps(forward=False)
         self.MOSFET3_G.off()
+        # add more pullins and extend rake at the top
+        # gradual pullin and full pullin at the top
 
     def unload(self):
         """Unloads container. (Crane and speed must be manually lowered.)"""
         self.buzz(3)
         # Open the trap door on the bottom of the container
-        self.SERVO_2.value = -1
+        self.SERVO_2.value = -0.88
         sleep(self.servotime)
         # Additional shaky movements to loosen stucked parts
         self.SERVO_1.value = 0.98
@@ -183,7 +185,7 @@ class MarsPCB:
             self.make_steps(forward=False)
         self.MOSFET3_G.off()
         # Shut the trap door
-        self.SERVO_2.value = 0.15
+        self.SERVO_2.value = 0.88
         sleep(self.servotime)
         self.SERVO_1.detach()
         self.SERVO_2.detach()

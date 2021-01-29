@@ -85,7 +85,7 @@ def execute_command():
         msg_ob.lightsen = hw_ob.AMBIENT.value
         logging.info('Battery: {bat} Light: {light}'
                      .format(bat=msg_ob.batteryv, light=msg_ob.lightsen))
-        hw_ob.steptime = 1/(msg_ob.potmeter * 7)
+        hw_ob.steptime = 1/(msg_ob.potmeter * 9)
         logging.info('Steptime: {s}'.format(s=hw_ob.steptime))
         logging.info('loop end'.center(20, '-'))
 
